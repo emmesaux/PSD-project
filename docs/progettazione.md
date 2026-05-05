@@ -179,13 +179,52 @@ side effect: non ce ne sono
 - tests/: test unitari e integrazione.
 - docs/: report e progettazione.
 
-## 12. Ambiente di sviluppo da dichiarare nel report
+## 11.1 Mappatura file --> moduli
+Per facilitare l'implementazione e la manutenzione, ecco la mappatura proposta tra file e moduli del sistema:
+
+### Livello ADT (Dati)
+- **include/studenti.h**: Interfaccia pubblica ADT Studenti (Tabella Hash).
+- **src/adt/studenti.c**: Implementazione ADT Studenti.
+- **include/prenotazioni.h**: Interfaccia pubblica ADT Prenotazioni (Lista collegata).
+- **src/adt/prenotazioni.c**: Implementazione ADT Prenotazioni.
+- **include/posti.h**: Interfaccia pubblica ADT Posti aula (Array).
+- **src/adt/posti.c**: Implementazione ADT Posti aula.
+- **include/presenze.h**: Interfaccia pubblica ADT Presenze (Lista collegata).
+- **src/adt/presenze.c**: Implementazione ADT Presenze.
+- **include/lista_attesa.h**: Interfaccia pubblica ADT Lista di attesa (Coda circolare su array).
+- **src/adt/lista_attesa.c**: Implementazione ADT Lista di attesa.
+- **include/storico.h**: Interfaccia pubblica ADT Storico accessi (Lista collegata).
+- **src/adt/storico.c**: Implementazione ADT Storico accessi.
+
+### Livello Funzioni del sistema (Servizi)
+- **include/servizi_studenti.h**: Interfaccia servizi per gestione studenti.
+- **src/services/servizi_studenti.c**: Implementazione servizi studenti.
+- **include/servizi_prenotazioni.h**: Interfaccia servizi per prenotazioni.
+- **src/services/servizi_prenotazioni.c**: Implementazione servizi prenotazioni.
+- **include/servizi_accessi.h**: Interfaccia servizi per check-in/check-out e lista attesa.
+- **src/services/servizi_accessi.c**: Implementazione servizi accessi.
+- **include/servizi_report.h**: Interfaccia servizi per report e statistiche.
+- **src/services/servizi_report.c**: Implementazione servizi report.
+
+### Livello Presentazione (CLI)
+- **include/menu.h**: Interfaccia per il menu CLI.
+- **src/app/menu.c**: Implementazione menu CLI e orchestrazione.
+- **src/app/main.c**: Punto di ingresso principale del programma.
+
+### Test e documentazione
+- **tests/test_studenti.c**: Test unitari per ADT Studenti.
+- **tests/test_prenotazioni.c**: Test unitari per ADT Prenotazioni.
+- **tests/test_integration.c**: Test di integrazione per flussi completi.
+- **docs/progettazione.md**: Documento di progettazione (questo file).
+- **docs/README.md**: Guida utente e istruzioni di build.
+
+Questa mappatura garantisce una separazione chiara delle responsabilità e facilita la navigazione nel codice sorgente.
 Inserire una sezione esplicita con:
 - Sistema operativo usato per sviluppo e test (Windows).
 - Compilatore e versione.
 - Standard C usato C99.
 
-## 13. Criteri di accettazione della progettazione
+## 12. Criteri di accettazione della progettazione
 La progettazione e considerata completa se:
 - Copre tutti i requisiti funzionali della traccia.
 - Definisce responsabilita e confini dei moduli.
