@@ -1,76 +1,33 @@
 # PSD-project
 
-Commit iniziale per abilitare la creazione di branch.
-Generazione secondo Brench
+Sistema in C per la gestione di un'aula studio: studenti, prenotazioni, accessi e report.
 
-Struttura iniziale del progetto, con creazione dei possibili file utili e di un inizio di progettazione.
+## Menu CLI
+=== Menu Aula Studio ===
+1) Registra studente
+2) Inserisci prenotazione
+3) Verifica disponibilita
+4) Check-in prenotato
+5) Ingresso senza prenotazione
+6) Registra uscita
+7) Report
+0) Esci
+(Durante un inserimento scrivi 0 per annullare)
 
+## Moduli e struttura
+- include/: interfacce pubbliche.
+- src/: implementazioni dei moduli.
+- main.c: CLI e orchestrazione.
+- tests/: test di base.
+- docs/: documentazione.
 
-SCHEMA COMPLETO DEGLI ADT
-1?? ????? Studenti
-?? ADT: Tabella Hash
-Contiene: dati studenti (matricola, nome, corso)
-Serve per:
-registrazione
-ricerca veloce per matricola
-Motivo:
-accesso O(1)
-2?? ?? Prenotazioni
-?? ADT: Lista collegata
-Contiene:
-matricola
-data
-fascia oraria
-posto assegnato
-Serve per:
-gestire prenotazioni
-annullamenti
-visualizzazione prenotati
-Motivo:
-struttura dinamica
+## ADT principali
+- Studenti: tabella hash (ricerca per matricola).
+- Prenotazioni: lista collegata.
+- Posti aula: array.
+- Presenze: lista collegata.
+- Lista di attesa: coda circolare.
+- Storico accessi: lista collegata.
 
-?? (opzionale migliore: una lista per fascia oraria)
-
-3?? ?? Posti aula
-?? ADT: Array
-Contiene:
-stato posto (libero/occupato/prenotato)
-Serve per:
-verificare disponibilit?
-assegnare posti
-Motivo:
-accesso diretto O(1)
-4?? ?? Presenze
-?? ADT: Lista collegata
-Contiene:
-matricola
-posto occupato
-Serve per:
-sapere chi ? dentro
-gestire check-in/check-out
-Motivo:
-numero variabile
-5?? ? Lista di attesa
-?? ADT: Coda circolare (array)
-Contiene:
-matricole studenti in attesa
-Serve per:
-gestire ingresso quando aula piena
-Motivo:
-FIFO + ottimizzazione spazio
-6?? ?? Storico accessi
-?? ADT: Lista collegata
-Contiene:
-matricola
-orario ingresso
-orario uscita
-stato (prenotato / no-show / attesa)
-Serve per:
-generare report
-Motivo:
-cresce dinamicamente
-
-## Progettazione
-
-La progettazione completa del sistema e disponibile qui:
-- [docs/progettazione.md](docs/progettazione.md)
+## Documentazione
+La progettazione completa e in [docs/progettazione.md](docs/progettazione.md).

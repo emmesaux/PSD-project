@@ -1,233 +1,165 @@
 # Progettazione - Sistema Gestione Aula Studio
 
 ## 1. Obiettivo del sistema
-Progettare un sistema in C per gestire accessi e prenotazioni di un'aula studio universitaria.
-La progettazione copre architettura, moduli, flussi operativi, responsabilita e vincoli.
+Questo sistema in C gestisce accessi e prenotazioni di un'aula studio.
+La progettazione descrive architettura, moduli, flussi, responsabilita e vincoli.
 
 ## 2. Vincoli progettuali
-- Linguaggio target: C99.
-- Interfaccia utente: CLI a menu.
-- Information hiding: ogni ADT espone solo API pubbliche, nascondendo i dettagli interni.
+- Linguaggio: C99.
+- Interfaccia: CLI a menu.
+- Information hiding: gli ADT espongono solo API pubbliche.
 
 ## 3. Architettura logica
-Il sistema e suddiviso in tre livelli.
+Il sistema ha tre livelli.
 
-1. Livello Presentazione (CLI)
-- Gestisce input/output utente e menu.
-- Passa le richieste ai moduli di gestione.
+1. Presentazione (CLI)
+- Gestisce input/output e menu.
+- Inoltra le richieste alla logica applicativa.
 
-2. Livello Funzioni del sistema
-- Coordina le operazioni principali: registrazione, prenotazione, check-in/check-out, attesa, report.
+2. Funzioni del sistema
+- Coordina registrazioni, prenotazioni, accessi, attese e report.
 
-3. Livello ADT (Dati)
-- Implementa strutture dati e operazioni primitive in modo incapsulato.
+3. ADT (Dati)
+- Implementa strutture dati e operazioni primitive.
 
 ## 4. ADT scelti e responsabilita
 ### 4.1 Studenti - Tabella Hash
 Responsabilita:
-- Inserimento nuovo studente.
+- Inserimento studenti.
 - Ricerca per matricola.
-- Verifica esistenza studente.
+- Verifica esistenza.
 
 Motivazione:
-- Accesso medio O(1) per operazioni frequenti su matricola.
+- Accesso medio O(1) per chiave.
 
 ### 4.2 Prenotazioni - Lista collegata
 Responsabilita:
-- Inserimento prenotazione.
-- Ricerca prenotazioni per studente/data/fascia.
-- Annullamento prenotazione.
-- Visualizzazione prenotati.
+- Inserimento prenotazioni.
+- Ricerca per studente/data/fascia.
+- Annullamenti.
 
 Motivazione:
-- Struttura dinamica adatta a inserimenti/rimozioni frequenti.
+- Struttura dinamica adatta a inserimenti e rimozioni.
 
 ### 4.3 Posti aula - Array
 Responsabilita:
 - Stato posto (libero, prenotato, occupato).
 - Verifica disponibilita per fascia.
-- Assegnazione/rilascio posto.
+- Assegnazione e rilascio posto.
 
 Motivazione:
-- Accesso diretto O(1) per indice posto.
+- Accesso diretto per indice.
 
 ### 4.4 Presenze - Lista collegata
 Responsabilita:
-- Traccia studenti attualmente presenti.
+- Traccia studenti presenti.
 - Supporto a check-in e check-out.
 
 Motivazione:
-- Cardinalita variabile durante la giornata.
+- Cardinalita variabile.
 
 ### 4.5 Lista di attesa - Coda circolare su array
 Responsabilita:
-- Inserimento in attesa quando aula piena.
+- Inserimento in attesa quando l'aula e piena.
 - Estrazione FIFO quando si libera un posto.
 
 Motivazione:
-- Politica equa FIFO e uso efficiente dello spazio.
+- Ordine di arrivo e uso efficiente della memoria.
 
 ### 4.6 Storico accessi - Lista collegata
 Responsabilita:
-- Registrazione eventi ingresso/uscita.
-- Tracciamento stato finale (prenotato, no-show, da attesa).
-- Supporto report statistici.
+- Registra ingresso e uscita.
+- Traccia lo stato finale (prenotato, no-show, da attesa).
 
 Motivazione:
-- Crescita dinamica e append naturale degli eventi.
+- Crescita dinamica e append naturale.
 
 ## 5. Interazioni tra componenti
 ### 5.1 Registrazione studente
-CLI -> Servizio Studenti -> ADT Studenti.
+CLI -> Gestione aula -> ADT Studenti.
 
 ### 5.2 Prenotazione posto
-CLI -> Servizio Prenotazioni -> ADT Studenti (validazione matricola) -> ADT Posti (disponibilita) -> ADT Prenotazioni (inserimento).
+CLI -> Gestione aula -> ADT Studenti -> ADT Posti -> ADT Prenotazioni.
 
 ### 5.3 Check-in studente prenotato
-CLI -> Servizio Accessi -> ADT Prenotazioni (verifica) -> ADT Posti (stato occupato) -> ADT Presenze (inserimento) -> ADT Storico (evento ingresso).
+CLI -> Gestione aula -> ADT Prenotazioni -> ADT Posti -> ADT Presenze -> ADT Storico.
 
 ### 5.4 Ingresso senza prenotazione
-CLI -> Servizio Accessi -> ADT Posti.
-- Se posto disponibile: ingresso diretto e aggiornamento Presenze/Storico.
-- Se aula piena: enqueue in ADT Lista Attesa.
+CLI -> Gestione aula -> ADT Posti.
+- Posto libero: aggiorna Presenze e Storico.
+- Aula piena: inserisce in Lista Attesa.
 
 ### 5.5 Uscita studente
-CLI -> Servizio Accessi -> ADT Presenze (rimozione) -> ADT Posti (rilascio) -> ADT Storico (evento uscita) -> ADT Lista Attesa (eventuale promozione del primo in coda).
+CLI -> Gestione aula -> ADT Presenze -> ADT Posti -> ADT Storico -> ADT Lista Attesa.
 
 ### 5.6 Report
-CLI -> Servizio Report -> ADT Prenotazioni + ADT Presenze + ADT Storico + ADT Lista Attesa.
+CLI -> Report -> ADT Prenotazioni, Presenze, Storico, Lista Attesa.
 
 ## 6. Regole principali
 - Uno studente deve essere registrato prima di prenotare.
 - Un posto non puo essere assegnato a due studenti nella stessa fascia.
-- Il check-in prenotato e consentito solo se prenotazione valida.
-- L'ingresso senza prenotazione e consentito solo con posti liberi.
-- In caso di aula piena, l'ingresso passa in lista di attesa FIFO.
-- L'uscita libera il posto e puo innescare promozione automatica dalla lista di attesa.
+- Il check-in prenotato richiede prenotazione valida.
+- L'ingresso senza prenotazione richiede posto libero.
+- In caso di aula piena si usa la lista di attesa FIFO.
+- L'uscita libera il posto e puo attivare una promozione dalla lista.
 
 ## 7. Invarianti di sistema
-- Una matricola identifica univocamente uno studente.
-- Uno studente non puo risultare presente due volte contemporaneamente.
-- Uno stesso posto non puo essere contemporaneamente libero e occupato.
-- Ogni check-in/check-out deve avere corrispondenza nello storico.
+- Una matricola identifica uno studente in modo univoco.
+- Uno studente non puo risultare presente due volte.
+- Un posto non puo essere libero e occupato nello stesso istante.
+- Ogni check-in e check-out deve comparire nello storico.
 
 ## 8. Progettazione del menu CLI
-Voci minime previste:
+Voci previste:
 1. Registra studente
 2. Inserisci prenotazione
-3. Verifica disponibilita posti
+3. Verifica disponibilita
 4. Check-in prenotato
 5. Ingresso senza prenotazione
 6. Registra uscita
-7. Visualizza prenotati
-8. Visualizza presenti
-9. Visualizza lista di attesa
-10. Annulla prenotazione
-11. Visualizza storico accessi
-12. Genera report riepilogativo
-13. Esci
+7. Report
+0. Esci
+
+Nota operativa:
+- Durante un inserimento, scrivere 0 per annullare e tornare al menu.
 
 ## 9. Metriche e output report
-Il report deve includere almeno:
+Il report include:
 - Numero totale prenotazioni.
 - Accessi effettivi.
 - Occupazione per fascia oraria.
 - Numero studenti no-show.
 - Numero studenti rimasti in attesa.
 
-## 10. Specifica sintattica e semantica
-In questa fase manteniamo solo 3 funzioni guida, utili per avviare l'implementazione dei file.
-
-### 10.1 Registra studente
-SPECIFICA SINTATTICA
-int registra_studente(char*, char*, char*)->int
-tipi char*, char*, char*, int
-
-SPECIFICA SEMANTICA
-registra_studente(matricola, nome, corso)->r
-precondizione: matricola valida e non gia presente
-postcondizione: lo studente viene inserito nella tabella studenti
-side effect: aggiornamento della tabella hash studenti
-
-### 10.2 Inserisci prenotazione
-SPECIFICA SINTATTICA
-int inserisci_prenotazione(char*, char*, char*, int)->int
-tipi char*, char*, char*, int, int
-
-SPECIFICA SEMANTICA
-inserisci_prenotazione(matricola, data, fascia_oraria, posto)->r
-precondizione: studente registrato, posto disponibile, nessun duplicato su matricola/data/fascia
-postcondizione: prenotazione registrata e posto marcato come prenotato
-side effect: aggiornamento lista prenotazioni e stato posti
-
-### 10.3 Verifica disponibilita posti
-SPECIFICA SINTATTICA
-int verifica_disponibilita(char*, char*)->int
-tipi char*, char*, int
-
-SPECIFICA SEMANTICA
-verifica_disponibilita(data, fascia_oraria)->r
-precondizione: data e fascia_oraria valide
-postcondizione: r rappresenta il numero di posti disponibili nella fascia richiesta
-side effect: non ce ne sono
-
-## 11. Struttura file proposta (solo progettazione)
+## 10. Struttura file (versione accorpata)
 - include/: interfacce pubbliche dei moduli.
-- src/adt/: implementazioni ADT.
-- src/services/: regole del sistema.
-- src/app/: menu CLI e orchestrazione.
-- tests/: test unitari e integrazione.
+- src/: implementazioni core dei moduli.
+- main.c: CLI e orchestrazione.
+- tests/: test di base.
 - docs/: report e progettazione.
 
-## 11.1 Mappatura file --> moduli
-Per facilitare l'implementazione e la manutenzione, ecco la mappatura proposta tra file e moduli del sistema:
+## 10.1 Mappatura file --> moduli
+### Moduli principali
+- **include/studente.h** e **src/studente.c**: Anagrafica studenti (tabella hash).
+- **include/aula_gestione.h** e **src/aula_gestione.c**: Prenotazioni, presenze e logica di accesso.
+- **include/coda_attesa.h** e **src/coda_attesa.c**: Lista di attesa FIFO (coda circolare).
+- **include/report.h** e **src/report.c**: Calcolo e stampa report.
+- **include/errori.h**: Codici esito comuni.
+- **include/configurazione.h**: Costanti e limiti input.
 
-### Livello ADT (Dati)
-- **include/studenti.h**: Interfaccia pubblica ADT Studenti (Tabella Hash).
-- **src/adt/studenti.c**: Implementazione ADT Studenti.
-- **include/prenotazioni.h**: Interfaccia pubblica ADT Prenotazioni (Lista collegata).
-- **src/adt/prenotazioni.c**: Implementazione ADT Prenotazioni.
-- **include/posti.h**: Interfaccia pubblica ADT Posti aula (Array).
-- **src/adt/posti.c**: Implementazione ADT Posti aula.
-- **include/presenze.h**: Interfaccia pubblica ADT Presenze (Lista collegata).
-- **src/adt/presenze.c**: Implementazione ADT Presenze.
-- **include/lista_attesa.h**: Interfaccia pubblica ADT Lista di attesa (Coda circolare su array).
-- **src/adt/lista_attesa.c**: Implementazione ADT Lista di attesa.
-- **include/storico.h**: Interfaccia pubblica ADT Storico accessi (Lista collegata).
-- **src/adt/storico.c**: Implementazione ADT Storico accessi.
+### Presentazione e test
+- **main.c**: Menu CLI.
+- **tests/test_main.c**: Test di integrazione base.
 
-### Livello Funzioni del sistema (Servizi)
-- **include/servizi_studenti.h**: Interfaccia servizi per gestione studenti.
-- **src/services/servizi_studenti.c**: Implementazione servizi studenti.
-- **include/servizi_prenotazioni.h**: Interfaccia servizi per prenotazioni.
-- **src/services/servizi_prenotazioni.c**: Implementazione servizi prenotazioni.
-- **include/servizi_accessi.h**: Interfaccia servizi per check-in/check-out e lista attesa.
-- **src/services/servizi_accessi.c**: Implementazione servizi accessi.
-- **include/servizi_report.h**: Interfaccia servizi per report e statistiche.
-- **src/services/servizi_report.c**: Implementazione servizi report.
-
-### Livello Presentazione (CLI)
-- **include/menu.h**: Interfaccia per il menu CLI.
-- **src/app/menu.c**: Implementazione menu CLI e orchestrazione.
-- **src/app/main.c**: Punto di ingresso principale del programma.
-
-### Test e documentazione
-- **tests/test_studenti.c**: Test unitari per ADT Studenti.
-- **tests/test_prenotazioni.c**: Test unitari per ADT Prenotazioni.
-- **tests/test_integration.c**: Test di integrazione per flussi completi.
-- **docs/progettazione.md**: Documento di progettazione (questo file).
-- **docs/README.md**: Guida utente e istruzioni di build.
-
-Questa mappatura garantisce una separazione chiara delle responsabilità e facilita la navigazione nel codice sorgente.
 Inserire una sezione esplicita con:
 - Sistema operativo usato per sviluppo e test (Windows).
 - Compilatore e versione.
 - Standard C usato C99.
 
-## 12. Criteri di accettazione della progettazione
-La progettazione e considerata completa se:
+## 11. Criteri di accettazione della progettazione
+La progettazione e completa se:
 - Copre tutti i requisiti funzionali della traccia.
 - Definisce responsabilita e confini dei moduli.
-- Esplicita flussi operativi.
+- Esplicita i flussi operativi.
 - Stabilisce invarianti verificabili nei test.
-- E pronta per essere tradotta in codice senza ambiguita.
+- E pronta per essere tradotta in codice.
